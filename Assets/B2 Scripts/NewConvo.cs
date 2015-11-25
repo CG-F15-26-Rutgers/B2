@@ -119,17 +119,14 @@ public class NewConvo : MonoBehaviour {
     
     protected Node DeltreseShootBall(Val<Vector3> P3Pos)
     {
-        Vector3 deltreseDifference = deltrese.transform.position - backboard.transform.position;
         Vector3 targetDifference = DeltreseGoTo.position - backboard.transform.position;
-        
-        Debug.Log("Deltrese pos: " + deltrese.transform.position.ToString("F3"));
-        Debug.Log("Backboard pos: " + backboard.transform.position.ToString("F3"));
-        Debug.Log("Deltrese difference: " + deltreseDifference.ToString("F3"));
-        Debug.Log("Target difference: " + targetDifference.ToString("F3"));
+        // Sequence throwAnimation = new Sequence(deltrese.GetComponent<BehaviorMecanim>().Node_BodyAnimation("throw", true),
+        //                                     new LeafWait(2500),
+        //                                     deltrese.GetComponent<BehaviorMecanim>().Node_BodyAnimation("throw", true));
         
         return new SequenceParallel(new LeafTrace("throwBall"),
                                     new Sequence(new LeafWait(2500), basketball.GetComponent<BasketBall>().invokeThrow(targetDifference)),
-                                    new Sequence(deltrese.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("throw", 1000)));
+                                    new Sequence(deltrese.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wave", 1000)));
     }
      
 
@@ -148,7 +145,7 @@ public class NewConvo : MonoBehaviour {
         Val<FullBodyBipedEffector> effecting = Val.V(() => shake);
         Val<InteractionObject> Shake1 = Val.V(() => shake1);
         Val<InteractionObject> Shake2 = Val.V(() => shake2);
-        return new SequenceParallel(new Sequence(new LeafTrace("Interaction"),person1.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, Shake2), new LeafWait(1000)),
+        return new SequenceParallel(new Sequence(new LeafTrace("Interaction"), person1.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, Shake2), new LeafWait(1000)),
                                     new Sequence(new LeafTrace("Interaction"), person2.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, Shake1), new LeafWait(1000)));
     }
 
