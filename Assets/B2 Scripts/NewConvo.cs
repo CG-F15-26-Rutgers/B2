@@ -50,7 +50,7 @@ public class NewConvo : MonoBehaviour {
         return new Sequence(new SequenceParallel(DeltreseThinking(), OrientAndWave(P1Pos, P2Pos), WalkAndTalk(P1Pos, P2Pos)), DeltresePickUpBall(),
                             new SequenceParallel(DeltreseWalkTo(DeltreseGoTo), ThatDamnDeltrese(P3Pos)),
                             DeltreseShootBall(P3Pos),
-                            CallDeltrese(P1Pos, P2Pos, P3Pos),
+                            //CallDeltrese(P1Pos, P2Pos, P3Pos),
                             EOC(deltrese.transform.position));
     }
     #endregion
@@ -142,10 +142,10 @@ public class NewConvo : MonoBehaviour {
         //                                     new LeafWait(2500),
         //                                     deltrese.GetComponent<BehaviorMecanim>().Node_BodyAnimation("throw", true));
         
-        return new Sequence(SequenceParallel(new LeafTrace("throwBall"),
-                                             basketball.GetComponent<BasketBall>().invokeThrow(targetDifference),
-                                             deltrese.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wave", 1000)),
-                            deltrese.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("cry", 1000);
+        return new Sequence(new SequenceParallel(new LeafTrace("throwBall"),
+												 basketball.GetComponent<BasketBall>().invokeThrow(targetDifference),
+												 deltrese.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wave", 1000)),
+                            deltrese.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("cry", 1000));
     }
      
 
