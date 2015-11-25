@@ -9,7 +9,7 @@ public class BasketBall : MonoBehaviour {
     void Start()
     {
         ball = GetComponent<Rigidbody>();
-		ball.isKinematic = true;
+        ball.isKinematic = true;
         ball.useGravity = false;
     }
 
@@ -21,7 +21,7 @@ public class BasketBall : MonoBehaviour {
     public RunStatus throwball(Val<Vector3> direction)
     {
         transform.parent = null;
-		ball.isKinematic = false;
+        ball.isKinematic = false;
         ball.useGravity = true;
         ball.velocity = -direction.Value * 2.1f;
         
