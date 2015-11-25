@@ -25,8 +25,8 @@ public class NewConvo : MonoBehaviour {
     {
        
     }
-	
-	void Update () {
+
+    void Update () {
 
         Val<Vector3> P1Pos = Val.V(() => person1.transform.position);
         Val<Vector3> P2Pos = Val.V(() => person2.transform.position);
@@ -34,9 +34,7 @@ public class NewConvo : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.E) == true)
         {
-            
-
-            agent = new BehaviorAgent(conversationTree(P1Pos, P2Pos, P3Pos));
+			agent = new BehaviorAgent(conversationTree(P1Pos, P2Pos, P3Pos));
             BehaviorManager.Instance.Register(agent);
             agent.StartBehavior();
         }
@@ -50,10 +48,9 @@ public class NewConvo : MonoBehaviour {
     protected Node conversationTree(Val<Vector3> P1Pos, Val<Vector3> P2Pos, Val<Vector3> P3Pos)
     {
         return new Sequence(new SequenceParallel(DeltreseThinking(), OrientAndWave(P1Pos, P2Pos), WalkAndTalk(P1Pos, P2Pos)), DeltresePickUpBall(),
-                   new SequenceParallel( DeltreseWalkTo(DeltreseGoTo) , ThatDamnDeltrese( P3Pos )),
-                DeltreseShootBall(P3Pos),
-                CallDeltrese(P1Pos, P2Pos, P3Pos)
-            );
+							new SequenceParallel(DeltreseWalkTo(DeltreseGoTo), ThatDamnDeltrese(P3Pos)),
+							DeltreseShootBall(P3Pos),
+							CallDeltrese(P1Pos, P2Pos, P3Pos));
     }
     #endregion
 
@@ -63,31 +60,30 @@ public class NewConvo : MonoBehaviour {
     //
     protected Node OrientAndWave( Val<Vector3> P1Pos, Val<Vector3> P2Pos )
     {
-        return new Sequence(person1.GetComponent<BehaviorMecanim>().Node_OrientTowards(P2Pos) , P1Wave(),
-                            person2.GetComponent<BehaviorMecanim>().Node_OrientTowards(P1Pos) , P2Wave());
+        return new Sequence(person1.GetComponent<BehaviorMecanim>().Node_OrientTowards(P2Pos),
+							P1Wave(),
+                            person2.GetComponent<BehaviorMecanim>().Node_OrientTowards(P1Pos),
+							P2Wave());
     }
 
 
     protected Node WalkAndTalk( Val<Vector3> P1Pos , Val<Vector3> P2Pos)
     {
         return new Sequence(person2.GetComponent<BehaviorMecanim>().Node_GoToUpToRadius(P1Pos, 2.5f),
-                            person2.GetComponent<BehaviorMecanim>().Node_OrientTowards(P1Pos) , 
-                            person1.GetComponent<BehaviorMecanim>().Node_OrientTowards(P2Pos) , Talk());
+                            person2.GetComponent<BehaviorMecanim>().Node_OrientTowards(P1Pos), 
+                            person1.GetComponent<BehaviorMecanim>().Node_OrientTowards(P2Pos),
+							Talk());
     }
 
 
     protected Node CallDeltrese(Val<Vector3> P1Pos, Val<Vector3> P2Pos, Val<Vector3> P3Pos)
     {
-        return new Sequence(
-            eyeContact(P1Pos , P2Pos),
-            //person2.GetComponent<BehaviorMecanim>().Node_OrientTowards(P3Pos),
-            person2.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("think", 3000),
-            deltrese.GetComponent<BehaviorMecanim>().Node_OrientTowards(P1Pos),
-            deltrese.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wave", 3000),
-            deltrese.GetComponent<BehaviorMecanim>().Node_GoToUpToRadius(P2Pos, 3.0f),
-            Argue(P1Pos, P2Pos, P3Pos)
-            );
-
+        return new Sequence(eyeContact(P1Pos , P2Pos),
+							person2.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("think", 3000),
+							deltrese.GetComponent<BehaviorMecanim>().Node_OrientTowards(P1Pos),
+							deltrese.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wave", 3000),
+							deltrese.GetComponent<BehaviorMecanim>().Node_GoToUpToRadius(P2Pos, 3.0f),
+							Argue(P1Pos, P2Pos, P3Pos));
     }
     #endregion
 
@@ -123,9 +119,17 @@ public class NewConvo : MonoBehaviour {
     
     protected Node DeltreseShootBall(Val<Vector3> P3Pos)
     {
-        return new SequenceParallel( new LeafTrace("throwBall"),
-                            new Sequence(new LeafWait(2500), basketball.GetComponent<BasketBall>().ST_throw(deltrese.transform.position - backboard.transform.position)),
-                            new Sequence(this.ST_BodyAnim(deltrese, "throw", 1000)));
+		Vector3 deltreseDifference = deltrese.transform.position - backboard.transform.position;
+		Vector3 targetDifference = DeltreseGoTo.position - backboard.transform.position;
+		
+		Debug.Log("Deltrese pos: " + deltrese.transform.position.ToString("F3"));
+		Debug.Log("Backboard pos: " + backboard.transform.position.ToString("F3"));
+		Debug.Log("Deltrese difference: " + deltreseDifference.ToString("F3"));
+		Debug.Log("Target difference: " + targetDifference.ToString("F3"));
+		
+        return new SequenceParallel(new LeafTrace("throwBall"),
+                                    new Sequence(new LeafWait(2500), basketball.GetComponent<BasketBall>().invokeThrow(targetDifference)),
+                                    new Sequence(deltrese.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("throw", 1000)));
     }
      
 
@@ -134,8 +138,8 @@ public class NewConvo : MonoBehaviour {
         Val<string>name = Val.V(() => gName);
         Val<bool>start = Val.V(() => true);
         return new Sequence(guy.GetComponent<BehaviorMecanim>().Node_BodyAnimation(name, start),
-                        new LeafWait(1000),
-                        guy.GetComponent<BehaviorMecanim>().Node_BodyAnimation(name, false));
+                            new LeafWait(1000),
+                            guy.GetComponent<BehaviorMecanim>().Node_BodyAnimation(name, false));
     }
      
 
@@ -144,10 +148,8 @@ public class NewConvo : MonoBehaviour {
         Val<FullBodyBipedEffector> effecting = Val.V(() => shake);
         Val<InteractionObject> Shake1 = Val.V(() => shake1);
         Val<InteractionObject> Shake2 = Val.V(() => shake2);
-        return new SequenceParallel(
-            new Sequence( new LeafTrace("Interaction"),person1.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, Shake2), new LeafWait(1000)),
-            new Sequence(new LeafTrace("Interaction"), person2.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, Shake1), new LeafWait(1000))
-            );
+        return new SequenceParallel(new Sequence(new LeafTrace("Interaction"),person1.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, Shake2), new LeafWait(1000)),
+                                    new Sequence(new LeafTrace("Interaction"), person2.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, Shake1), new LeafWait(1000)));
     }
 
 
@@ -155,13 +157,16 @@ public class NewConvo : MonoBehaviour {
     {
         Val<FullBodyBipedEffector> effecting = Val.V(() => Effector);
         Val<InteractionObject> Pokeball = Val.V(() => pokeball);
-        return new Sequence(new LeafTrace("Interaction") , deltrese.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting , Pokeball), new LeafWait(1000));
+		
+        return new Sequence(new LeafTrace("Interaction"),
+							deltrese.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, Pokeball),
+							new LeafWait(1000));
     }
 
     protected Node ThatDamnDeltrese(Val<Vector3> P3Pos)
     {        
-        return new Sequence( person1.GetComponent<BehaviorMecanim>().Node_HeadLook(P3Pos) , 
-                                     person2.GetComponent<BehaviorMecanim>().Node_HeadLook(P3Pos) );
+        return new Sequence(person1.GetComponent<BehaviorMecanim>().Node_HeadLook(P3Pos),
+                            person2.GetComponent<BehaviorMecanim>().Node_HeadLook(P3Pos));
     }
 
 
@@ -173,36 +178,26 @@ public class NewConvo : MonoBehaviour {
 
     protected Node Talk()
     {
-            return new Sequence(
-                HandShake(),
-                new SequenceShuffle(
-                    person1.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("beingcocky", 5000),
-                    person1.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("cheer", 5000),
-                    person2.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("clap", 5000),
-                    person1.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("think", 5000),
-                    new SequenceParallel(P1isBored() , person2.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("cry" , 5000))
-                    //person2.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("lookawaygesture", 5000) 
-            ));
+            return new Sequence(HandShake(),
+								new SequenceShuffle(person1.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("beingcocky", 5000),
+													person1.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("cheer", 5000),
+													person2.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("clap", 5000),
+													person1.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("think", 5000),
+													new SequenceParallel(P1isBored(), person2.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("cry", 5000))));
     }
 
 
     protected Node Argue( Val<Vector3> P1Pos, Val<Vector3> P2Pos, Val<Vector3> P3Pos )
     {
-        return new Sequence(
-            new SequenceParallel(
-                person1.GetComponent<BehaviorMecanim>().Node_OrientTowards(P3Pos) , 
-                person2.GetComponent<BehaviorMecanim>().Node_OrientTowards(P3Pos) , 
-                deltrese.GetComponent<BehaviorMecanim>().Node_OrientTowards(P1Pos)
-                ),
-                new SequenceShuffle(
-                    deltrese.GetComponent<BehaviorMecanim>().Node_HeadLook(P1Pos) , new LeafWait(1000) , deltrese.GetComponent<BehaviorMecanim>().Node_HeadLook(P2Pos),
-                    person1.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Yawn" , 3000),
-                    person2.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("lookaway" , 3000),
-                    deltrese.GetComponent<BehaviorMecanim>().ST_PlayBodyGesture("headnodyes" , 3000)
-                    
-                    )
-               
-                );
+        return new Sequence(new SequenceParallel(person1.GetComponent<BehaviorMecanim>().Node_OrientTowards(P3Pos), 
+												 person2.GetComponent<BehaviorMecanim>().Node_OrientTowards(P3Pos), 
+												 deltrese.GetComponent<BehaviorMecanim>().Node_OrientTowards(P1Pos)),
+							new SequenceShuffle(deltrese.GetComponent<BehaviorMecanim>().Node_HeadLook(P1Pos),
+												new LeafWait(1000),
+												deltrese.GetComponent<BehaviorMecanim>().Node_HeadLook(P2Pos),
+												person1.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Yawn", 3000),
+												person2.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("lookaway", 3000),
+												deltrese.GetComponent<BehaviorMecanim>().ST_PlayBodyGesture("headnodyes", 3000)));
     }
 
     protected Node eyeContact( Val<Vector3> P1Pos , Val<Vector3>P2Pos )
@@ -212,16 +207,8 @@ public class NewConvo : MonoBehaviour {
         Val<Vector3> newP1Pos = Val.V(() => P1Pos.Value + height);
         Val<Vector3> newP2Pos = Val.V(() => P2Pos.Value + height);
         
-        return new SequenceParallel(
-        person1.GetComponent<BehaviorMecanim>().Node_HeadLook(newP2Pos),
-        person2.GetComponent<BehaviorMecanim>().Node_HeadLook(newP1Pos));
-
+        return new SequenceParallel(person1.GetComponent<BehaviorMecanim>().Node_HeadLook(newP2Pos),
+									person2.GetComponent<BehaviorMecanim>().Node_HeadLook(newP1Pos));
     }
     #endregion
-
-
-   
-
-
 }
-
